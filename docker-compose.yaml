@@ -1,0 +1,62 @@
+services:
+  traefik:
+    image: traefik:v2.9.6
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+    ports:
+      - "88:80"
+      - "8088:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  labcaller-api:
+    build:
+      context: ../labcaller-api
+    environment:
+      - DB_HOST=labcaller-db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=psql
+      - DB_NAME=postgres
+      - DB_PREFIX=postgresql+asyncpg
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_BFF_ID=${KEYCLOAK_BFF_ID}
+      - KEYCLOAK_BFF_SECRET=${KEYCLOAK_BFF_SECRET}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+    ports:
+      - 8005:8000
+    depends_on:
+        - labcaller-db
+    volumes:
+      - ../labcaller-api/app:/app/app
+    labels:
+      - "traefik.http.routers.labcaller-bff.rule=Host(`labcaller`) && PathPrefix(`/api`)"
+      - "traefik.http.services.labcaller-bff.loadbalancer.server.port=8000"
+    entrypoint: ["uvicorn", "--host=0.0.0.0",
+              "--timeout-keep-alive=0", "app.main:app", "--reload"]
+
+  labcaller:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    labels:
+      - "traefik.http.routers.labcaller.rule=Host(`labcaller`)"
+      - "traefik.http.services.labcaller.loadbalancer.server.port=5173"
+    volumes:
+      - ../labcaller:/app
+
+  labcaller-db:
+    image: postgis/postgis:16-master
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=psql
+      - POSTGRES_DB=postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - labcaller-db-data:/var/lib/postgresql/data
+
+volumes:
+  labcaller-db-data:

@@ -1,0 +1,8 @@
+FROM node:22.2.0-alpine as builder
+
+WORKDIR /app
+COPY package.json yarn.lock ./
+COPY . .
+
+# Start in development mode
+CMD yarn dev
