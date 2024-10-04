@@ -8,6 +8,7 @@ import { keycloakAuthProvider } from './authProvider';
 import submissions from './submissions';
 import axios from 'axios';
 import Dashboard from './Dashboard';
+import MyLayout from './Layout';
 
 const initOptions: KeycloakInitOptions = {
     onLoad: 'login-required',
@@ -32,12 +33,14 @@ const App = () => {
     const initializingPromise = useRef<Promise<Keycloak>>(undefined);
     const authProvider = useRef<AuthProvider>();
     const dataProvider = useRef<DataProvider>();
+    const [deployment, setDeployment] = useState(undefined);
+
 
     useEffect(() => {
         const initKeyCloakClient = async () => {
             const response = await axios.get(UIConfigUrl);
             const keycloakConfig = response.data.keycloak;
-            console.log(keycloakConfig)
+            setDeployment(response.data.deployment);
 
             // Initialize Keycloak here, once you have the configuration
             const keycloakClient = new Keycloak({
@@ -73,16 +76,14 @@ const App = () => {
             dataProvider={dataProvider.current}
             title="LabCaller"
             dashboard={Dashboard}
+            layout={(props) => <MyLayout {...props} deployment={deployment} />}
         >
             {permissions => (
                 <>
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (
-                                <>
-                                    <Resource name="submissions" {...submissions} />
-
-                                </>
+                                <Resource name="submissions" {...submissions} />
                             ) : null}
                         </>
                     ) : null}
