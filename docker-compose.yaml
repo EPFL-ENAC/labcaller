@@ -13,29 +13,37 @@ services:
   labcaller-api:
     build:
       context: ../labcaller-api
+      dockerfile: Dockerfile.dev
     environment:
       - DB_HOST=labcaller-db
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=psql
       - DB_NAME=postgres
-      - DB_PREFIX=postgresql+asyncpg
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-      - KEYCLOAK_BFF_ID=${KEYCLOAK_BFF_ID}
-      - KEYCLOAK_BFF_SECRET=${KEYCLOAK_BFF_SECRET}
+      - DB_PREFIX=postgresql
+      - KEYCLOAK_UI_ID=${KEYCLOAK_UI_ID}
+      - KEYCLOAK_API_ID=${KEYCLOAK_API_ID}
+      - KEYCLOAK_API_SECRET=${KEYCLOAK_API_SECRET}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
       - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - S3_URL=${S3_URL}
+      - S3_BUCKET_ID=${S3_BUCKET_ID}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_PREFIX=${S3_PREFIX}
+      - DEPLOYMENT=local
     ports:
-      - 8005:8000
+      - 3005:3000
     depends_on:
         - labcaller-db
     volumes:
-      - ../labcaller-api/app:/app/app
+      - ../labcaller-api/src:/app/src
+      - labcaller-api-build-data:/app/target  # Store builds in docker volume
+      - ../labcaller-api/Cargo.toml:/app/Cargo.toml
+      - ../labcaller-api//Cargo.lock:/app/Cargo.lock
     labels:
-      - "traefik.http.routers.labcaller-bff.rule=Host(`labcaller`) && PathPrefix(`/api`)"
-      - "traefik.http.services.labcaller-bff.loadbalancer.server.port=8000"
-    entrypoint: ["uvicorn", "--host=0.0.0.0",
-              "--timeout-keep-alive=0", "app.main:app", "--reload"]
+      - "traefik.http.routers.labcaller-api.rule=Host(`labcaller`) && PathPrefix(`/api`)"
+      - "traefik.http.services.labcaller-api.loadbalancer.server.port=3000"
 
   labcaller:
     build:
@@ -48,15 +56,16 @@ services:
       - ../labcaller:/app
 
   labcaller-db:
-    image: postgis/postgis:16-master
+    image: postgres:17.0
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=psql
       - POSTGRES_DB=postgres
     ports:
-      - 5433:5432
+      - 5443:5432
     volumes:
       - labcaller-db-data:/var/lib/postgresql/data
 
 volumes:
   labcaller-db-data:
+  labcaller-api-build-data:
