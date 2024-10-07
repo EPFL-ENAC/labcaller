@@ -32,7 +32,7 @@ const SubmissionCreate = () => {
             <SimpleForm >
                 <TextField source="id" />
                 <TextInput source="name" helperText="Name your submission" validate={[required()]} />
-                <TextInput source="description" />
+                <TextInput source="comment" />
             </SimpleForm>
         </Create >
     )

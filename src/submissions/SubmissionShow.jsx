@@ -2,11 +2,8 @@ import {
     Show,
     SimpleShowLayout,
     TextField,
+    BooleanField,
     DateField,
-    ArrayField,
-    SingleFieldList,
-    Datagrid,
-    FunctionField,
 } from 'react-admin';
 
 
@@ -14,28 +11,25 @@ const SubmissionShow = () => {
     return (
         <Show>
             <SimpleShowLayout>
+                <TextField source="id" />
                 <TextField source="name" />
-                <TextField source="description" />
+                <TextField source="comment" />
+                <BooleanField source="processing_has_started" />
+                <BooleanField source="processing_success" />
                 <DateField
-                    label="Submitted at"
-                    source="time_added_utc"
+                    label="Created on (UTC)"
+                    source="created_on"
                     sortable={false}
                     showTime={true}
                 />
-                <ArrayField source="inputs" sort={{ field: "filename", order: "ASC" }}>
-                    <Datagrid bulkActionButtons={false}>
-                        <TextField source="filename" />
-                        <FunctionField
-                            source="size"
-                            render={record => `${(record.size / 1024 / 1024).toFixed(2)} MB`}
-                        />
-                        <DateField source="modified" showTime />
-                    </Datagrid>
-                </ArrayField>
+                <DateField
+                    label="Last updated (UTC)"
+                    source="last_updated"
+                    sortable={false}
+                    showTime={true}
+                />
             </SimpleShowLayout>
         </Show >
     )
 };
-
-
 export default SubmissionShow;

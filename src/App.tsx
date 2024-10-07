@@ -35,7 +35,6 @@ const App = () => {
     const dataProvider = useRef<DataProvider>();
     const [deployment, setDeployment] = useState(undefined);
 
-
     useEffect(() => {
         const initKeyCloakClient = async () => {
             const response = await axios.get(UIConfigUrl);
