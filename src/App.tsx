@@ -6,6 +6,7 @@ import Keycloak, { KeycloakTokenParsed, KeycloakInitOptions, } from 'keycloak-js
 import { httpClient } from 'ra-keycloak';
 import { keycloakAuthProvider } from './authProvider';
 import submissions from './submissions';
+import uploads from './uploads';
 import axios from 'axios';
 import Dashboard from './Dashboard';
 import MyLayout from './Layout';
@@ -82,7 +83,10 @@ const App = () => {
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (
-                                <Resource name="submissions" {...submissions} />
+                                <>
+                                    <Resource name="submissions" {...submissions} />
+                                    <Resource name="uploads" {...uploads} />
+                                </>
                             ) : null}
                         </>
                     ) : null}

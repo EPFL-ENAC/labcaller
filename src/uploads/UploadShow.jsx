@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import dataProvider from '../../../.history/deepreefmap-ui/src/dataProvider/index_20240424113643';
 import { Typography } from '@mui/material';
 import {
     Show,
