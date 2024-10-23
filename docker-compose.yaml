@@ -32,7 +32,7 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - APP_NAME=${APP_NAME}
       - DEPLOYMENT=local
-      - KUBECONFIG=/root/.kube/config
+      - KUBECONFIG=/root/.kube/config.yaml
       - KUBE_NAMESPACE=runai-enac-it-ejthomas
     ports:
       - 3005:3000
