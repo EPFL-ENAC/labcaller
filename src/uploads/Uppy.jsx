@@ -12,6 +12,7 @@ import '@uppy/core/dist/style.min.css';
 import '@uppy/drag-drop/dist/style.min.css';
 import '@uppy/status-bar/dist/style.min.css';
 import './UppyUploader.css'; // Import custom CSS
+import Tus from '@uppy/tus';
 
 export const UppyUploader = () => {
     const auth = useAuthProvider();
@@ -30,28 +31,36 @@ export const UppyUploader = () => {
         authorization: `Bearer ${token}`,
     };
 
+    // const [uppy] = useState(() => new Uppy({
+    //     // restrictions: {
+    //     // allowedFileTypes: ['.tif']
+    //     // }
+    // }).use(XHR, {
+    //     endpoint: '/api/uploads',
+    //     headers: headers,
+    //     limit: 25,
+    //     onAfterResponse: (response) => {
+    //         console.log('onAfterResponse', response);
+    //         const parsedResponse = JSON.parse(response.response);
+
+    //         if (response.status === 200) {
+    //             notify('File uploaded successfully');
+    //             refresh();
+    //         } else {
+    //             console.log("Response", parsedResponse);
+    //             notify(`Error uploading file: ${parsedResponse.detail.message}`);
+    //         }
+    //     }
+    // }));
+
     const [uppy] = useState(() => new Uppy({
         // restrictions: {
         // allowedFileTypes: ['.tif']
         // }
-    }).use(XHR, {
-        endpoint: '/api/uploads',
+    }).use(Tus, {
+        endpoint: 'http://labcaller:88/files',
         headers: headers,
-        limit: 25,
-        onAfterResponse: (response) => {
-            console.log('onAfterResponse', response);
-            const parsedResponse = JSON.parse(response.response);
-
-            if (response.status === 200) {
-                notify('File uploaded successfully');
-                refresh();
-            } else {
-                console.log("Response", parsedResponse);
-                notify(`Error uploading file: ${parsedResponse.detail.message}`);
-            }
-        }
     }));
-
     return (
         <>
             <DragDrop id="dragdrop" uppy={uppy}

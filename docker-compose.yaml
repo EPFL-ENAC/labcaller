@@ -69,6 +69,20 @@ services:
     volumes:
       - labcaller-db-data:/var/lib/postgresql/data
 
+  labcaller-tus:
+    image:  tusproject/tusd:latest
+    environment:
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY}
+      - AWS_REGION=us-east-1
+    command: -s3-bucket ${S3_BUCKET_ID} -s3-endpoint ${S3_URL} -s3-object-prefix labcaller-local -behind-proxy -port 8080 -hooks-http http://labcaller-api:3000/tus/hooks -hooks-http-forward-headers Authorization
+    volumes:
+      - labcaller-tus-data:/data
+    labels:
+      - "traefik.http.routers.labcaller-tus.rule=Host(`labcaller`) && PathPrefix(`/files`)"
+      - "traefik.http.services.labcaller-tus.loadbalancer.server.port=8080"
+
 volumes:
   labcaller-db-data:
   labcaller-api-build-data:
+  labcaller-tus-data:
