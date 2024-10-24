@@ -13,15 +13,21 @@ import '@uppy/drag-drop/dist/style.min.css';
 import '@uppy/status-bar/dist/style.min.css';
 import './UppyUploader.css'; // Import custom CSS
 import Tus from '@uppy/tus';
+import { Grid } from '@mui/material';
 
-export const UppyUploader = () => {
+export const UppyUploader = ({ submission_id }) => {
     const auth = useAuthProvider();
     const token = auth.getToken();
     const refresh = useRefresh();
     const notify = useNotify();
     const pondRef = useRef(null);
+    if (!submission_id) {
+        notify("No submission ID provided");
+        return null;
+    }
     const headers = {
         authorization: `Bearer ${token}`,
+        SubmissionId: submission_id,
     };
     const [uppy] = useState(() => new Uppy(
         {}).use(Tus, {
@@ -31,9 +37,11 @@ export const UppyUploader = () => {
     );
 
     return (
-        <>
-            <DragDrop id="dragdrop" uppy={uppy} />
-            <StatusBar id="statusbar" uppy={uppy} />
-        </>
+        <Grid container justifyContent="center">
+            <Grid item>
+                <DragDrop id="dragdrop" uppy={uppy} />
+                <StatusBar id="statusbar" uppy={uppy} />
+            </Grid>
+        </Grid>
     );
 };
