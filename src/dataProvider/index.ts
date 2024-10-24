@@ -186,10 +186,13 @@ const dataProvider = (
         })),
 
 
-    getStatus: (resource, params) => {
+    getStatus: () => {
         const url = `${apiUrl}/status`;
         // Return the promise with the JSON array
-        return httpClient(url).then(({ json }) => ({ data: json }));
+        return httpClient(url).then(({ json }) => ({ data: json })).catch((error) => {
+            console.error("Error in getStatus", error);
+            return { data: {} };
+        });
     },
     executeKubernetesJob: (id) => {
         const url = `${apiUrl}/submissions/${id}/execute`;
@@ -201,8 +204,8 @@ const dataProvider = (
         return httpClient(url)
             .then(({ json }) => ({ data: json }))
             .then(function (signed) {
-            window.location = `${apiUrl}/submissions/download/${signed.data.token}`;
-        });
+                window.location = `${apiUrl}/submissions/download/${signed.data.token}`;
+            });
     },
     regenerateVideoStatistics: (id) => {
         const url = `${apiUrl}/objects/${id}`;
