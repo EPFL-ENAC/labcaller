@@ -13,9 +13,9 @@ import {
     useDelete,
     useRefresh,
 } from 'react-admin';
-import { UppyUploader } from '../uploads/Uppy';
 import { Grid, Box, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { FilePondUploader } from '../uploads/FilePond';
 
 const UploadData = () => {
     const record = useRecordContext();
@@ -23,7 +23,7 @@ const UploadData = () => {
     return (
         <>
             <Box mt={2} mb={2}>
-                <UppyUploader submission_id={record.id} />
+                <FilePondUploader submission_id={record.id} />
             </Box>
         </>
     );
