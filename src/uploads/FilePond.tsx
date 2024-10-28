@@ -37,6 +37,7 @@ export const FilePondUploader = ({ submission_id }) => {
             })}
             chunkUploads={true}
             onprocessfiles={refresh}
+            maxParallelUploads={5}
             allowMultiple={true}
             credits={false}
             allowRevert={false}
