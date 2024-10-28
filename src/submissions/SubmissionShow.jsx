@@ -44,12 +44,15 @@ const CreateSubmissionButton = () => {
         color="error"
         onClick={
             (event) => {
+                event.stopPropagation();
                 deleteOne().then(() => {
                     notify("File deleted");
-                    refresh();
-                    event.stopPropagation();
+                    setTimeout(() => {
+                        refresh();
+                    }, 500);
                 }).catch((error) => {
                     notify("Error: File not deleted");
+                    console.error(error);
                 });
             }
         }
@@ -66,7 +69,7 @@ const SubmissionShow = () => {
     );
 
     return (
-        <Show>f
+        <Show>
             <SimpleShowLayout>
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -126,7 +129,6 @@ const SubmissionShow = () => {
                 <ArrayField source="associations" label="File Outputs" >
                     <Datagrid bulkActionButtons={false} rowClick={handleRowClick}
                     >
-                        <TextField source="filename" label="Filename" />
                         <DateField
                             source="created_on"
                             label="Added"
@@ -134,6 +136,8 @@ const SubmissionShow = () => {
                             showTime
                             transform={value => new Date(value + 'Z')}  // Fix UTC time
                         />
+                        <TextField source="filename" label="Filename" />
+                        <TextField source="processing_message" label="Status" />
                         <CreateSubmissionButton />
                     </Datagrid>
                 </ArrayField>
