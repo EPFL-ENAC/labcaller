@@ -42,8 +42,8 @@ services:
       - ../labcaller-api/src:/app/src
       - labcaller-api-build-data:/app/target  # Store builds in docker volume
       - ../labcaller-api/Cargo.toml:/app/Cargo.toml
-      - ../labcaller-api//Cargo.lock:/app/Cargo.lock
-      - ../kubeconfig:/root/.kube/config
+      - ../labcaller-api/Cargo.lock:/app/Cargo.lock
+      - ../kubeconfig:/root/.kube/config.yaml
     labels:
       - "traefik.http.routers.labcaller-api.rule=Host(`labcaller`) && PathPrefix(`/api`)"
       - "traefik.http.services.labcaller-api.loadbalancer.server.port=3000"

@@ -50,9 +50,6 @@ export const FilePondUploader = ({ submission_id }) => {
                             return null;
                         }
                     };
-                    console.log("file", file);
-                    console.log("Fieldname", fieldName);
-                    console.log("Metadata", metadata);
                     var upload = new tus.Upload(file, {
                         endpoint: "/files",
                         retryDelays: [0, 1000, 3000, 5000],
@@ -72,6 +69,7 @@ export const FilePondUploader = ({ submission_id }) => {
                         },
                         onSuccess: function () {
                             load(upload.url.split('/').pop())
+                            refresh();
                         }
                     })
                     // Start the upload

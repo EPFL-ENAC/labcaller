@@ -12,10 +12,15 @@ import {
     useNotify,
     useDelete,
     useRefresh,
+    useUnselectAll,
+    Button,
+    useListContext,
+    useDeleteMany,
 } from 'react-admin';
 import { Grid, Box, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { FilePondUploader } from '../uploads/FilePond';
+import { useEffect } from "react";
 
 const UploadData = () => {
     const record = useRecordContext();
@@ -28,20 +33,22 @@ const UploadData = () => {
         </>
     );
 };
-const CreateSubmissionButton = () => {
+const DeleteObjectButton = () => {
     const record = useRecordContext();
-    if (!record) return null;
 
     const notify = useNotify();
     const refresh = useRefresh();
 
-    const [deleteOne, { isPending, error }] = useDelete(
+    const [deleteOne] = useDelete(
         'uploads',
         { id: record.id, previousData: record }
     );
 
+    if (!record) return null;
+
     return <IconButton
         color="error"
+        sx={{ padding: 0, minWidth: 'auto' }}
         onClick={
             (event) => {
                 event.stopPropagation();
@@ -61,6 +68,49 @@ const CreateSubmissionButton = () => {
     </IconButton >;
 
 };
+const CustomBulkDeleteButton = () => {
+    const { selectedIds } = useListContext(); // Get selected IDs from the list context
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const [deleteMany] = useDeleteMany();
+    const unselectAll = useUnselectAll('submissions');
+    useEffect(() => {
+        return () =>
+            unselectAll();
+    }, []
+    );
+
+
+    const handleBulkDelete = () => {
+        deleteMany('uploads', { ids: selectedIds })
+            .then(() => {
+                notify("Files deleted");
+                unselectAll();
+                setTimeout(() => {
+                    refresh();
+                }, 500);
+            })
+            .catch((error) => {
+                notify("Error: Some files were not deleted");
+                console.error(error);
+            });
+    };
+
+
+    return (
+        <Button color="error" onClick={handleBulkDelete}>
+            Delete Selected
+        </Button>
+    );
+};
+
+// Update bulk action buttons to use the custom bulk delete button
+const AssociationBulkActionButtons = () => (
+    <>
+        <CustomBulkDeleteButton />
+    </>
+);
+
 
 const SubmissionShow = () => {
     const createPath = useCreatePath();
@@ -126,8 +176,8 @@ const SubmissionShow = () => {
                         <UploadData />
                     </Grid>
                 </Grid>
-                <ArrayField source="associations" label="File Outputs" >
-                    <Datagrid bulkActionButtons={false} rowClick={handleRowClick}
+                <ArrayField source="associations" label="File inputs" >
+                    <Datagrid bulkActionButtons={<AssociationBulkActionButtons />} rowClick={handleRowClick} size="small"
                     >
                         <DateField
                             source="created_on"
@@ -138,7 +188,7 @@ const SubmissionShow = () => {
                         />
                         <TextField source="filename" label="Filename" />
                         <TextField source="processing_message" label="Status" />
-                        <CreateSubmissionButton />
+                        <DeleteObjectButton />
                     </Datagrid>
                 </ArrayField>
 
