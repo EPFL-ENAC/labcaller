@@ -3,6 +3,7 @@ import {
     Loading,
     useAuthProvider,
     useRefresh,
+    useNotify,
 } from 'react-admin';
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
@@ -17,6 +18,7 @@ export const FilePondUploader = ({ submission_id }) => {
     const auth = useAuthProvider();
     if (!auth) return <Loading />;
 
+    const notify = useNotify();
     const token = auth.getToken();
     const refresh = useRefresh();
     const record = useRecordContext();
@@ -64,6 +66,9 @@ export const FilePondUploader = ({ submission_id }) => {
                         },
                         onError: function (err) {
                             console.log("Failed because: " + err)
+                            console.log(err)
+                            error('Failed to upload file ' + file.name);
+                            notify('Failed to upload file' + err);
                         },
                         onProgress: function (bytesUploaded, bytesTotal) {
                             progress(true, bytesUploaded, bytesTotal)
