@@ -65,10 +65,13 @@ export const FilePondUploader = ({ submission_id }) => {
                             filetype: filetype(file.name)
                         },
                         onError: function (err) {
-                            console.log("Failed because: " + err)
-                            console.log(err)
-                            error('Failed to upload file ' + file.name);
-                            notify('Failed to upload file' + err);
+                            if (err.originalResponse?._xhr.status === 400 && err.originalResponse?._xhr.response.includes('File already uploaded')) {
+                                notify("File '" + file.name + "' already exists, please delete the existing file if you wish you replace it.")
+                                error('Failed to upload file ' + file.name);
+                            } else {
+                                error('Failed to upload file ' + file.name);
+                                notify('Failed to upload file' + file.name);
+                            }
                         },
                         onProgress: function (bytesUploaded, bytesTotal) {
                             progress(true, bytesUploaded, bytesTotal)
@@ -80,6 +83,9 @@ export const FilePondUploader = ({ submission_id }) => {
                     })
                     // Start the upload
                     upload.start()
+                    console.log("Upload", upload);
+                    console.dir(upload);
+
                     return {
                         abort: () => {
                             upload.abort()

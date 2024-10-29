@@ -16,6 +16,8 @@ import {
     Button,
     useListContext,
     useDeleteMany,
+    TabbedShowLayout,
+    FunctionField,
 } from 'react-admin';
 import { Grid, Box, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -111,12 +113,42 @@ const AssociationBulkActionButtons = () => (
     </>
 );
 
-
-const SubmissionShow = () => {
+const Tabs = () => {
+    const record = useRecordContext();
     const createPath = useCreatePath();
     const handleRowClick = (id, resource, record) => (
         createPath({ resource: 'uploads', type: 'show', id: record.id })
     );
+    if (!record) return null;
+    const totalBytes = record.associations?.reduce((acc, cur) => acc + cur.size_bytes, 0);
+    console.log(totalBytes);
+    return (
+        <TabbedShowLayout>
+            <TabbedShowLayout.Tab label={`Inputs (${record.associations?.length ? record.associations.length : 0} files: ${(totalBytes / 1024 / 1024 / 1024).toFixed(2)} GB)`}>
+                <ArrayField source="associations" label="File inputs" >
+                    <Datagrid bulkActionButtons={<AssociationBulkActionButtons />} rowClick={handleRowClick} size="small"
+                    >
+                        <DateField
+                            source="created_on"
+                            label="Added"
+                            sortable={false}
+                            showTime
+                            transform={value => new Date(value + 'Z')}  // Fix UTC time
+                        />
+                        <TextField source="filename" label="Filename" />
+                        <FunctionField render={record => (record.size_bytes / 1024 / 1024 / 1024).toFixed(2) + " GB"} label="Size" />
+                        <BooleanField source="all_parts_received" label="Upload complete" />
+                        <TextField source="processing_message" label="Status" />
+                        <DeleteObjectButton />
+                    </Datagrid>
+                </ArrayField>
+            </TabbedShowLayout.Tab>
+        </TabbedShowLayout>
+    )
+
+}
+
+const SubmissionShow = () => {
 
     return (
         <Show>
@@ -176,22 +208,7 @@ const SubmissionShow = () => {
                         <UploadData />
                     </Grid>
                 </Grid>
-                <ArrayField source="associations" label="File inputs" >
-                    <Datagrid bulkActionButtons={<AssociationBulkActionButtons />} rowClick={handleRowClick} size="small"
-                    >
-                        <DateField
-                            source="created_on"
-                            label="Added"
-                            sortable={false}
-                            showTime
-                            transform={value => new Date(value + 'Z')}  // Fix UTC time
-                        />
-                        <TextField source="filename" label="Filename" />
-                        <TextField source="processing_message" label="Status" />
-                        <DeleteObjectButton />
-                    </Datagrid>
-                </ArrayField>
-
+                <Tabs />
             </SimpleShowLayout>
         </Show>
     )
