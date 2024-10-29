@@ -13,13 +13,17 @@ import {
     useDelete,
     useRefresh,
     useUnselectAll,
+    EditButton,
+    DeleteButton,
+    TopToolbar,
     Button,
     useListContext,
     useDeleteMany,
+    useDataProvider,
     TabbedShowLayout,
     FunctionField,
 } from 'react-admin';
-import { Grid, Box, IconButton } from '@mui/material';
+import { Grid, Box, Typography, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { FilePondUploader } from '../uploads/FilePond';
 import { useEffect } from "react";
@@ -120,12 +124,12 @@ const Tabs = () => {
         createPath({ resource: 'uploads', type: 'show', id: record.id })
     );
     if (!record) return null;
-    const totalBytes = record.associations?.reduce((acc, cur) => acc + cur.size_bytes, 0);
-    console.log(totalBytes);
+    const totalBytesInputs = record.associations?.reduce((acc, cur) => acc + cur.size_bytes, 0);
+    const totalBytesOutputs = record.outputs?.reduce((acc, cur) => acc + cur.size_bytes, 0);
     return (
         <TabbedShowLayout>
-            <TabbedShowLayout.Tab label={`Inputs (${record.associations?.length ? record.associations.length : 0} files: ${(totalBytes / 1024 / 1024 / 1024).toFixed(2)} GB)`}>
-                <ArrayField source="associations" label="File inputs" >
+            <TabbedShowLayout.Tab label={`Inputs (${record.associations?.length ? record.associations.length : 0} files: ${(totalBytesInputs / 1024 / 1024 / 1024).toFixed(2)} GB)`}>
+                <ArrayField source="associations" label={false}>
                     <Datagrid bulkActionButtons={<AssociationBulkActionButtons />} rowClick={handleRowClick} size="small"
                     >
                         <DateField
@@ -143,15 +147,64 @@ const Tabs = () => {
                     </Datagrid>
                 </ArrayField>
             </TabbedShowLayout.Tab>
-        </TabbedShowLayout>
+            <TabbedShowLayout.Tab label={`Outputs (${record.outputs?.length === 1 ? '1 file' : `${record.outputs?.length || 0} files`}: ${(totalBytesOutputs / 1024 / 1024 / 1024).toFixed(2)} GB)`}>
+                <ArrayField source="outputs" label={false} >
+                    <Datagrid bulkActionButtons={false} rowClick={false} >
+                        <DateField
+                            source="last_modified"
+                            label="Created"
+                            sortable={false}
+                            showTime
+                        />
+                        <TextField source="filename" label="Filename" />
+                        <FunctionField render={record => (record.size_bytes / 1024 / 1024 / 1024).toFixed(2) + " GB"} label="Size" />
+                    </Datagrid>
+                </ArrayField>
+            </TabbedShowLayout.Tab>
+        </TabbedShowLayout >
     )
 
 }
 
 const SubmissionShow = () => {
+    const SubmissionShowActions = () => {
+        function timeout(delay) {
+            return new Promise(res => setTimeout(res, delay));
+        }
+
+        const dataProvider = useDataProvider();
+        const record = useRecordContext();
+        const refresh = useRefresh();
+        if (!record) return null;
+
+        // Create a function callback for onClick that calls a PUT request to the API
+        const executeJob = () => {
+            // Wait for return of the promise before refreshing the page
+            dataProvider.executeKubernetesJob(record.id).then(() => {
+                notify('Job submitted. It may take some time for it to appear...');
+                setDisableExecuteButton(true);
+                timeout(10000).then(() => {
+                    setDisableExecuteButton(false);
+                });
+            });
+        }
+
+        return (
+            <TopToolbar>
+                <>
+                    <Button
+                        variant="contained"
+                        color="success"
+                        // disabled={readyToSubmit || disableExecuteButton}
+                        onClick={executeJob}>Execute Job</Button>
+                    <EditButton />
+                    <DeleteButton /></>
+            </TopToolbar>
+        );
+    }
 
     return (
-        <Show>
+        <Show actions={<SubmissionShowActions />} >
             <SimpleShowLayout>
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -210,7 +263,7 @@ const SubmissionShow = () => {
                 </Grid>
                 <Tabs />
             </SimpleShowLayout>
-        </Show>
+        </Show >
     )
 };
 export default SubmissionShow;

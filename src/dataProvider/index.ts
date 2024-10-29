@@ -195,7 +195,7 @@ const dataProvider = (
         });
     },
     executeKubernetesJob: (id) => {
-        const url = `${apiUrl}/submissions/${id}/execute`;
+        const url = `${apiUrl}/submissions/${id}`;
         // Return the promise with the JSON array
         return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
     },
@@ -206,10 +206,6 @@ const dataProvider = (
             .then(function (signed) {
                 window.location = `${apiUrl}/submissions/download/${signed.data.token}`;
             });
-    },
-    regenerateVideoStatistics: (id) => {
-        const url = `${apiUrl}/objects/${id}`;
-        return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
     },
     deleteKubernetesJob: (id) => {
         const url = `${apiUrl}/submissions/kubernetes/jobs/${id}`;
