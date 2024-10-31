@@ -161,6 +161,27 @@ const Tabs = () => {
                     </Datagrid>
                 </ArrayField>
             </TabbedShowLayout.Tab>
+            <TabbedShowLayout.Tab label={`Status (${record.status?.length} runs)`}>
+                <ArrayField source="status" label={false} >
+                    <Datagrid bulkActionButtons={false} rowClick={false} >
+                        <DateField
+                            source="start_time"
+                            label="Created"
+                            sortable={false}
+                            showTime
+                        />
+                        <TextField source="run_id" label="Run ID" />
+                        <TextField source="latest_status" />
+                        <DateField
+                            source="latest_status_time"
+                            label="Status time"
+                            sortable={false}
+                            showTime
+                        />
+
+                    </Datagrid>
+                </ArrayField>
+            </TabbedShowLayout.Tab>
         </TabbedShowLayout >
     )
 
