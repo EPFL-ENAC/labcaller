@@ -75,7 +75,7 @@ const App = () => {
             authProvider={authProvider.current}
             dataProvider={dataProvider.current}
             title="LabCaller"
-            dashboard={Dashboard}
+            // dashboard={Dashboard}
             layout={(props) => <MyLayout {...props} deployment={deployment} />}
         >
             {permissions => (
