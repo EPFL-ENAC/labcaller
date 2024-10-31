@@ -225,7 +225,7 @@ const SubmissionShow = () => {
     }
 
     return (
-        <Show actions={<SubmissionShowActions />} >
+        <Show actions={<SubmissionShowActions />} queryOptions={{ refetchInterval: 5000 }} >
             <SimpleShowLayout>
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
