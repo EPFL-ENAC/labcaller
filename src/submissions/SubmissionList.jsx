@@ -11,23 +11,21 @@ const SubmissionList = () => {
     return (
         <List disableSyncWithLocation
             perPage={25}
-            sort={{ field: 'time_added_utc', order: 'DESC' }}
+            sort={{ field: 'created_on', order: 'DESC' }}
         >
             <Datagrid rowClick="show" >
                 <TextField source="name" />
                 <TextField source="comment" />
-                <BooleanField source="processing_has_started" />
-                <BooleanField source="processing_success" />
                 <DateField
                     label="Created on (UTC)"
                     source="created_on"
-                    // sortable={false}
+                    transform={value => new Date(value + 'Z')}
                     showTime={true}
                 />
                 <DateField
                     label="Last updated (UTC)"
                     source="last_updated"
-                    // sortable={false}
+                    transform={value => new Date(value + 'Z')}
                     showTime={true}
                 />
             </Datagrid>
