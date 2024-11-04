@@ -135,18 +135,17 @@ const Tabs = () => {
     return (
         <TabbedShowLayout>
             <TabbedShowLayout.Tab label={`Inputs (${record.associations?.length ? record.associations.length : 0} files: ${(totalBytesInputs / 1024 / 1024 / 1024).toFixed(2)} GB)`}>
-                <ArrayField source="associations" label={false}>
+                <ArrayField source="associations" label={false} sort={{ field: 'filename', order: 'ASC' }}>
                     <Datagrid bulkActionButtons={<AssociationBulkActionButtons />} rowClick={handleRowClick} size="small"
                     >
                         <DateField
                             source="created_on"
                             label="Added"
-                            sortable={false}
                             showTime
                             transform={value => new Date(value + 'Z')}  // Fix UTC time
                         />
                         <TextField source="filename" label="Filename" />
-                        <FunctionField render={record => (record.size_bytes / 1024 / 1024 / 1024).toFixed(2) + " GB"} label="Size" />
+                        <FunctionField render={record => (record.size_bytes / 1024 / 1024 / 1024).toFixed(2) + " GB"} label="Size" source="size_bytes" />
                         <BooleanField source="all_parts_received" label="Upload complete" />
                         <TextField source="processing_message" label="Status" />
                         <DeleteObjectButton />
