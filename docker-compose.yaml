@@ -36,6 +36,7 @@ services:
       - KUBE_NAMESPACE=runai-enac-it-ejthomas
       - SUBMISSION_BASE_IMAGE=registry.rcp.epfl.ch/rcp-test-ejthomas/dorado
       - SUBMISSION_BASE_IMAGE_TAG=0.2
+      - SERIALIZER_SECRET_KEY=${SERIALIZER_SECRET_KEY}
     ports:
       - 3005:3000
     depends_on:

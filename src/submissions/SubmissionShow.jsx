@@ -26,7 +26,7 @@ import {
 import { Grid, Box, Typography, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { FilePondUploader } from '../uploads/FilePond';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const UploadData = () => {
     const record = useRecordContext();
@@ -120,9 +120,15 @@ const AssociationBulkActionButtons = () => (
 const Tabs = () => {
     const record = useRecordContext();
     const createPath = useCreatePath();
+    const dataProvider = useDataProvider();
     const handleRowClick = (id, resource, record) => (
         createPath({ resource: 'uploads', type: 'show', id: record.id })
     );
+    const downloadFile = (id, basePath, record, event) => {
+        dataProvider.downloadFile(record.url);
+        event.stopPropagation();
+    };
+
     if (!record) return null;
     const totalBytesInputs = record.associations?.reduce((acc, cur) => acc + cur.size_bytes, 0);
     const totalBytesOutputs = record.outputs?.reduce((acc, cur) => acc + cur.size_bytes, 0);
@@ -149,7 +155,7 @@ const Tabs = () => {
             </TabbedShowLayout.Tab>
             <TabbedShowLayout.Tab label={`Outputs (${record.outputs?.length === 1 ? '1 file' : `${record.outputs?.length || 0} files`}: ${(totalBytesOutputs / 1024 / 1024 / 1024).toFixed(2)} GB)`}>
                 <ArrayField source="outputs" label={false} >
-                    <Datagrid bulkActionButtons={false} rowClick={false} >
+                    <Datagrid bulkActionButtons={false} rowClick={downloadFile} >
                         <DateField
                             source="last_modified"
                             label="Created"
@@ -188,14 +194,18 @@ const Tabs = () => {
 }
 
 const SubmissionShow = () => {
+    const [disableExecuteButton, setDisableExecuteButton] = useState(false);
+    const [listOfDisabledDeletionButtons, setListOfDisabledDeletionButtons] = useState([]);
+
     const SubmissionShowActions = () => {
+        const dataProvider = useDataProvider();
         function timeout(delay) {
             return new Promise(res => setTimeout(res, delay));
         }
 
-        const dataProvider = useDataProvider();
         const record = useRecordContext();
         const refresh = useRefresh();
+        const notify = useNotify();
         if (!record) return null;
 
         // Create a function callback for onClick that calls a PUT request to the API
@@ -216,7 +226,7 @@ const SubmissionShow = () => {
                     <Button
                         variant="contained"
                         color="success"
-                        // disabled={readyToSubmit || disableExecuteButton}
+                        disabled={disableExecuteButton}
                         onClick={executeJob}>Execute Job</Button>
                     <EditButton />
                     <DeleteButton /></>
