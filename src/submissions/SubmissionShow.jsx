@@ -193,46 +193,68 @@ const Tabs = () => {
 
 }
 
-const SubmissionShow = () => {
+
+const SubmissionShowActions = () => {
     const [disableExecuteButton, setDisableExecuteButton] = useState(false);
-    const [listOfDisabledDeletionButtons, setListOfDisabledDeletionButtons] = useState([]);
-
-    const SubmissionShowActions = () => {
-        const dataProvider = useDataProvider();
-        function timeout(delay) {
-            return new Promise(res => setTimeout(res, delay));
-        }
-
-        const record = useRecordContext();
-        const refresh = useRefresh();
-        const notify = useNotify();
-        if (!record) return null;
-
-        // Create a function callback for onClick that calls a PUT request to the API
-        const executeJob = () => {
-            // Wait for return of the promise before refreshing the page
-            dataProvider.executeKubernetesJob(record.id).then(() => {
-                notify('Job submitted. It may take some time for it to appear...');
-                setDisableExecuteButton(true);
-                timeout(10000).then(() => {
-                    setDisableExecuteButton(false);
-                });
-            });
-        }
-
-        return (
-            <TopToolbar>
-                <>
-                    <Button
-                        variant="contained"
-                        color="success"
-                        disabled={disableExecuteButton}
-                        onClick={executeJob}>Execute Job</Button>
-                    <EditButton />
-                    <DeleteButton /></>
-            </TopToolbar>
-        );
+    const dataProvider = useDataProvider();
+    function timeout(delay) {
+        return new Promise(res => setTimeout(res, delay));
     }
+
+    const record = useRecordContext();
+    const notify = useNotify();
+    // Check the list of input objects, if any are incomplete, disable the execute button
+    useEffect(() => {
+
+        // console.log("Record: ", record ? record : "No record");
+        if (record && record.associations) {
+            console.log("Record: ", record);
+            const incompleteUploads = record.associations.filter(upload => !upload.all_parts_received);
+            if (incompleteUploads.length > 0 || record.associations.length === 0) {
+                setDisableExecuteButton(true);
+            } else {
+                setDisableExecuteButton(false);
+            }
+        }
+    }, [record]);
+
+    if (!record) return null;
+
+    // Create a function callback for onClick that calls a PUT request to the API
+    const executeJob = () => {
+        // Wait for return of the promise before refreshing the page
+        dataProvider.executeKubernetesJob(record.id).then(() => {
+            notify('Job submitted. It may take some time for it to appear...');
+            setDisableExecuteButton(true);
+            timeout(10000).then(() => {
+                setDisableExecuteButton(false);
+            });
+        });
+    }
+
+    return (
+        <TopToolbar>
+            <>
+                {record?.associations?.length === 0 ? <Typography variant="body2" color="error">Upload some files before executing the job</Typography> :
+                    (
+                        record?.associations?.filter(upload => !upload.all_parts_received).length > 0 ?
+                            <Typography variant="body2" color="error">Complete or delete incomplete files before continuing</Typography> : null
+
+                    )}
+
+                <Button
+                    variant="contained"
+                    color="success"
+                    disabled={disableExecuteButton}
+                    onClick={executeJob}>Execute Job</Button>
+                <EditButton />
+                <DeleteButton /></>
+        </TopToolbar>
+    );
+}
+
+const SubmissionShow = () => {
+
 
     return (
         <Show actions={<SubmissionShowActions />} queryOptions={{ refetchInterval: 5000 }} >
