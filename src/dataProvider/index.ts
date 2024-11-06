@@ -200,11 +200,11 @@ const dataProvider = (
         return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
     },
     downloadFile: (url) => {
-        // Get the auth token from url, then forward new URL back to browser
+        // Get the signed URL from the API, then point the browser to it
         return httpClient(url)
             .then(({ json }) => ({ data: json }))
             .then(function (signed) {
-                window.location = `${apiUrl}/submissions/download/${signed.data.token}`;
+                window.location = signed.data.url;
             });
     },
     deleteKubernetesJob: (id) => {
